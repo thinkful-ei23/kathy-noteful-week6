@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 
 const Tag = require('../models/tag');
 const Note = require('../models/note');
+const User = require('../models/user');
 
 const router = express.Router();
 

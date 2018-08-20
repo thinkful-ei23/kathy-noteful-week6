@@ -11,6 +11,8 @@ const { PORT, MONGODB_URI } = require('./config');
 const notesRouter = require('./routes/notes');
 const foldersRouter = require('./routes/folders');
 const tagsRouter = require('./routes/tags');
+//const userRouter = require('./')
+
 
 // Create an Express application
 const app = express();

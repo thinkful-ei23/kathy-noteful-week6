@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 
 const Folder = require('../models/folder');
 const Note = require('../models/note');
+const User = require('../models/user');
 
 const router = express.Router();
 
@@ -119,7 +120,7 @@ router.delete('/:id', (req, res, next) => {
   }
 
   // ON DELETE SET NULL equivalent
-  const folderRemovePromise = Folder.findByIdAndRemove( id );
+  const folderRemovePromise = Folder.findByIdAndRemove(id);
   // ON DELETE CASCADE equivalent
   // const noteRemovePromise = Note.deleteMany({ folderId: id });
 

@@ -5,13 +5,13 @@ const bcrypt = require('bcryptjs');
 
 
 
-const UserSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema({
 	fullname: { type: String },
 	username: { type: String, unique: true, required: true },
 	password: { type: String, required: true }
 })
 
-UserSchema.set('toObject', {
+userSchema.set('toObject', {
 	virtuals: true,
 	versionKey: false,
 	transform: (doc, ret) => {
@@ -20,6 +20,9 @@ UserSchema.set('toObject', {
 	}
 });
 
+userSchema.statics.hashPassword = function (password) {
+	return bcrypt.hash(password, 10);
+};
 
 
 module.exports = mongoose.model('User', userSchema);

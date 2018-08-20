@@ -8,9 +8,8 @@ const router = express.Router();
 const User = require('../models/user');
 
 // POST user to db
-router.post('/users', (req, res, next) => {
-	const { username, password } = req.body;
-
+router.post('/', (req, res, next) => {
+	const { username, password, fullname } = req.body;
 
 	return User.find({ username })
 		.count()
@@ -24,6 +23,13 @@ router.post('/users', (req, res, next) => {
 				});
 			}
 			return User.hashPassword(password);
+		})
+		.then(digest => {
+			return User.create({
+				username,
+				password: digest,
+				fullname
+			});
 		})
 		.then(result => {
 			if (result) {

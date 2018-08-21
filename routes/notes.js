@@ -30,11 +30,11 @@ router.get('/', (req, res, next) => {
     filter.tags = tagId;
   }
 
-  Note.find(filter)
+  Note.find(filter) //
     .populate('tags')
     .sort({ updatedAt: 'desc' })
     .then(results => {
-      res.json(results);
+      res.json(results);  //
     })
     .catch(err => {
       next(err);
@@ -94,12 +94,12 @@ router.post('/', (req, res, next) => {
 
   const newNote = { title, content, folderId, tags };
 
-  Note.create(newNote)
+  Note.create(newNote) //
     .then(result => {
       res
         .location(`${req.originalUrl}/${result.id}`)
         .status(201)
-        .json(result);
+        .json(result); //
     })
     .catch(err => {
       next(err);

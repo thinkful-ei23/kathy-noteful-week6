@@ -1,7 +1,7 @@
 'use strict';
 
 const { Strategy: LocalStrategy } = require('passport-local');
-const User = require('../models.user');
+const User = require('../models/user');
 
 const localStrategy = new LocalStrategy((username, password, done) => {
 	let user;
@@ -15,7 +15,9 @@ const localStrategy = new LocalStrategy((username, password, done) => {
 					location: 'username'
 				});
 			}
-			const isValid = user.validatePassword(password);
+			return user.validatePassword(password);
+		})
+		.then(isValid => {
 			if (!isValid) {
 				return Promise.reject({
 					reason: 'LoginError',

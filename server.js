@@ -36,6 +36,7 @@ app.use(express.json());
 passport.use(localStrategy);
 passport.use(jwtStrategy);
 
+
 // Mount routers
 app.use('/api/notes', notesRouter);
 app.use('/api/folders', foldersRouter);

@@ -15,6 +15,7 @@ router.use('/', passport.authenticate('jwt', { session: false, failWithError: tr
 /* ========== GET/READ ALL ITEMS ========== */
 router.get('/', (req, res, next) => {
   const { searchTerm, folderId, tagId } = req.query;
+  const userId = req.user.id;
 
   let filter = {};
 
@@ -31,7 +32,10 @@ router.get('/', (req, res, next) => {
   }
 
   if (tagId) {
-    filter.tags = tagId;
+    filter.tagsId = tagId;
+  }
+  if (userId) {
+    filter.userId = userId;
   }
 
   Note.find(filter) //
@@ -48,6 +52,7 @@ router.get('/', (req, res, next) => {
 /* ========== GET/READ A SINGLE ITEM ========== */
 router.get('/:id', (req, res, next) => {
   const { id } = req.params;
+  const userId = req.user.id;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     const err = new Error('The `id` is not valid');
@@ -55,7 +60,7 @@ router.get('/:id', (req, res, next) => {
     return next(err);
   }
 
-  Note.findById(id)
+  Note.findOne({ _id: id, userId })
     .populate('tags')
     .then(result => {
       if (result) {
@@ -72,6 +77,7 @@ router.get('/:id', (req, res, next) => {
 /* ========== POST/CREATE AN ITEM ========== */
 router.post('/', (req, res, next) => {
   const { title, content, folderId, tags = [] } = req.body;
+  const userId = req.user.id;
 
   /***** Never trust users - validate input *****/
   if (!title) {
@@ -96,7 +102,7 @@ router.post('/', (req, res, next) => {
     });
   }
 
-  const newNote = { title, content, folderId, tags };
+  const newNote = { title, content, folderId, tags, userId };
 
   Note.create(newNote) //
     .then(result => {
@@ -114,6 +120,14 @@ router.post('/', (req, res, next) => {
 router.put('/:id', (req, res, next) => {
   const { id } = req.params;
   const { title, content, folderId, tags = [] } = req.body;
+  const updateNote = {};
+  const updateFields = ['title', 'content', 'folderId', 'tags']
+
+  updateFields.forEach(field => {
+    if (field in req.body) {
+      updateNote[field] = req.body[field];
+    }
+  });
 
   /***** Never trust users - validate input *****/
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -121,19 +135,11 @@ router.put('/:id', (req, res, next) => {
     err.status = 400;
     return next(err);
   }
-
-  if (!title) {
-    const err = new Error('Missing `title` in request body');
-    err.status = 400;
-    return next(err);
-  }
-
   if (folderId && !mongoose.Types.ObjectId.isValid(folderId)) {
     const err = new Error('The `folderId` is not valid');
     err.status = 400;
     return next(err);
   }
-
   if (tags) {
     tags.forEach((tag) => {
       if (!mongoose.Types.ObjectId.isValid(tag)) {
@@ -143,8 +149,6 @@ router.put('/:id', (req, res, next) => {
       }
     });
   }
-
-  const updateNote = { title, content, folderId, tags };
 
   Note.findByIdAndUpdate(id, updateNote, { new: true })
     .then(result => {
@@ -162,6 +166,7 @@ router.put('/:id', (req, res, next) => {
 /* ========== DELETE/REMOVE A SINGLE ITEM ========== */
 router.delete('/:id', (req, res, next) => {
   const { id } = req.params;
+  const userId = req.user.id;
 
   /***** Never trust users - validate input *****/
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -170,9 +175,13 @@ router.delete('/:id', (req, res, next) => {
     return next(err);
   }
 
-  Note.findByIdAndRemove(id)
-    .then(() => {
-      res.status(204).end();
+  Note.deleteOne({ _id: id, userId })
+    .then(result => {
+      if (result.n) {
+        res.sendStatus(204);
+      } else {
+        res.sendStatus(404);
+      }
     })
     .catch(err => {
       next(err);

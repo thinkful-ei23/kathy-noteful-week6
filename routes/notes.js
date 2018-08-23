@@ -78,7 +78,7 @@ router.get('/:id', (req, res, next) => {
 router.post('/', (req, res, next) => {
   const { title, content, folderId, tags = [] } = req.body;
   const userId = req.user.id;
-
+  console.log('req.user', req.user);
   /***** Never trust users - validate input *****/
   if (!title) {
     const err = new Error('Missing `title` in request body');
@@ -91,16 +91,23 @@ router.post('/', (req, res, next) => {
     err.status = 400;
     return next(err);
   }
+  if (folderId && !mongoose.Types.ObjectId.isValid(userId)) {
+    const err = new Error('The `userId` is not valid');
+    err.status = 400;
+    return next(err);
+  }
+  console.log('tags', tag);
 
   if (tags) {
     tags.forEach((tag) => {
+      console.log('tags', tag);
       if (!mongoose.Types.ObjectId.isValid(tag)) {
-        const err = new Error('The `id` is not valid');
+        const err = new Error('The `tags` array contains an invalid `id`');
         err.status = 400;
         return next(err);
       }
-    });
-  }
+    })
+  };
 
   const newNote = { title, content, folderId, tags, userId };
 

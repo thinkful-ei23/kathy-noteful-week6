@@ -96,18 +96,28 @@ router.post('/', (req, res, next) => {
     err.status = 400;
     return next(err);
   }
-  console.log('tags', tag);
+  //console.log('tags', tag);
+
+  // if (tags) {
+  //   tags.filter((tag) => {
+  //     //console.log('tags', tag);
+  //     if (!mongoose.Types.ObjectId.isValid(tag)) {
+  //       const err = new Error('The `tags` array contains an invalid `id`');
+  //       err.status = 400;
+  //       return next(err);
+  //     }
+  //   })
+  // };
 
   if (tags) {
-    tags.forEach((tag) => {
-      console.log('tags', tag);
-      if (!mongoose.Types.ObjectId.isValid(tag)) {
-        const err = new Error('The `tags` array contains an invalid `id`');
-        err.status = 400;
-        return next(err);
-      }
-    })
-  };
+    const badIds = tags.filter((tag) => !mongoose.Types.ObjectId.isValid(tag));
+    if (badIds.length) {
+      const err = new Error('The `tags` array contains an invalid `id`');
+      err.status = 400;
+      return next(err);
+    }
+  }
+
 
   const newNote = { title, content, folderId, tags, userId };
 
@@ -147,15 +157,26 @@ router.put('/:id', (req, res, next) => {
     err.status = 400;
     return next(err);
   }
-  if (tags) {
-    tags.forEach((tag) => {
-      if (!mongoose.Types.ObjectId.isValid(tag)) {
-        const err = new Error('The `tags.id` is not valid');
-        err.status = 400;
-        return next(err);
-      }
-    });
+  // if (tags) {
+  //   tags.filter((tag) => {
+  //     if (!mongoose.Types.ObjectId.isValid(tag)) {
+  //       const err = new Error('The `tags.id` is not valid');
+  //       err.status = 400;
+  //       return next(err);
+  //     }
+  //   });
+  // }
+
+  if (updateFields.tags) {
+    const badIds = updateFields.tags.filter((tag) => !mongoose.Types.ObjectId.isValid(tag));
+    if (badIds.length) {
+      const err = new Error('The `tags` array contains an invalid `id`');
+      err.status = 400;
+      return next(err);
+    }
   }
+
+
 
   Note.findByIdAndUpdate(id, updateNote, { new: true })
     .then(result => {

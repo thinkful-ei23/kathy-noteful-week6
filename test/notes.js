@@ -54,7 +54,8 @@ describe('Noteful API - Notes', function () {
     return mongoose.disconnect();
   });
 
-  describe.only('GET /api/notes', function () {
+
+  describe('GET /api/notes', function () {
 
     it('should return the correct number of Notes', function () {
       return Promise.all([

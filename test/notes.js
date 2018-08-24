@@ -27,9 +27,9 @@ describe('Noteful API - Notes', function () {
     return mongoose.connect(TEST_MONGODB_URI)
       .then(() => mongoose.connection.db.dropDatabase());
   });
+
   let token;
   let user;
-  // .set('Authorization', `Bearer ${token}`);
   beforeEach(function () {
     return Promise.all([
       User.insertMany(seedUsers),

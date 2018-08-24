@@ -4,13 +4,22 @@ const app = require('../server');
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
 
-const { TEST_MONGODB_URI } = require('../config');
+const { TEST_MONGODB_URI, JWT_SECRET } = require('../config');
 
 const User = require('../models/user');
+const Note = require('../models/note');
+const Folder = require('../models/folder');
+const Tag = require('../models/tag');
+
+const seedNotes = require('../db/seed/notes');
+const seedFolders = require('../db/seed/folders');
+const seedTags = require('../db/seed/tags');
+const seedUsers = require('../db/seed/users');
+
 
 const expect = chai.expect;
-
 chai.use(chaiHttp);
 
 describe('Noteful API - Users', function () {
@@ -23,8 +32,22 @@ describe('Noteful API - Users', function () {
 			.then(() => mongoose.connection.db.dropDatabase());
 	});
 
+	let user;
+	let token;
 	beforeEach(function () {
-		return User.createIndexes();
+		return Promise.all([
+			User.insertMany(seedUsers),
+			Note.insertMany(seedNotes),
+			Folder.insertMany(seedFolders),
+			Tag.insertMany(seedTags)
+		])
+			.then(([users]) => {
+				user = users[0];
+				//console.log('1111111111111111 user in beforeEach', user);
+				token = jwt.sign({ user }, JWT_SECRET, { subject: user.username });
+				// user is defined
+
+			})
 	});
 
 	afterEach(function () {

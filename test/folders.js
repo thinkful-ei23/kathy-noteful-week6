@@ -152,26 +152,36 @@ describe('Noteful API - Folders', function () {
 
   describe('POST /api/folders', function () {
 
-    it('should create and return a new item when provided valid data', function () {
-      const newItem = { 'name': 'newFolder' };
+    it.only('should create and return a new item when provided valid data', function () {
+      const newItem = { 'name': 'newFolderName' };
       let body;
-      return chai.request(app)
+      console.log('***********************************newItem.name', newItem.name);
+      const dbPromise = Folder.create({ userId: user.id });
+      const apiPromise = chai.request(app)
         .post('/api/folders')
-        .send(newItem)
+        .set('Authorization', `Bearer ${token}`)
+        .send(newItem);
+      console.log('***********************************newItem', newItem.name);
+      return Promise.all([dbPromise, apiPromise])
         .then(function (res) {
           body = res.body;
           expect(res).to.have.status(201);
           expect(res).to.have.header('location');
           expect(res).to.be.json;
-          expect(body).to.be.a('object');
-          expect(body).to.have.all.keys('id', 'name', 'createdAt', 'updatedAt');
-          return Folder.findById(body.id);
+          expect(body).to.be.an('object');
+          expect(body).to.have.all.keys('id', 'name', 'userId', 'createdAt', 'updatedAt');
+          console.log('+++++++++++++++++++++++++++++++++++++++name', name);
+          return Folder.findOne({ _id: body.id, userId: user, id });
         })
+
         .then(data => {
           expect(body.id).to.equal(data.id);
           expect(body.name).to.equal(data.name);
+          console.log('================================body.name', data.name);
+          expect(body.userId).to.equal(data.userId.toHexString());
           expect(new Date(body.createdAt)).to.eql(data.createdAt);
           expect(new Date(body.updatedAt)).to.eql(data.updatedAt);
+
         });
     });
 

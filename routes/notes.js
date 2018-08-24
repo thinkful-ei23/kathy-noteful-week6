@@ -139,6 +139,7 @@ router.put('/:id', (req, res, next) => {
   const { title, content, folderId, tags = [] } = req.body;
   const updateNote = {};
   const updateFields = ['title', 'content', 'folderId', 'tags']
+  const userId = req.user.id;
 
   updateFields.forEach(field => {
     if (field in req.body) {
@@ -157,15 +158,11 @@ router.put('/:id', (req, res, next) => {
     err.status = 400;
     return next(err);
   }
-  // if (tags) {
-  //   tags.filter((tag) => {
-  //     if (!mongoose.Types.ObjectId.isValid(tag)) {
-  //       const err = new Error('The `tags.id` is not valid');
-  //       err.status = 400;
-  //       return next(err);
-  //     }
-  //   });
-  // }
+  if (title === '') {
+    const err = new Error('Missing `title` in request body');
+    err.status = 400;
+    return next(err);
+  }
 
   if (updateFields.tags) {
     const badIds = updateFields.tags.filter((tag) => !mongoose.Types.ObjectId.isValid(tag));

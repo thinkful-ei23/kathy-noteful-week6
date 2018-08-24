@@ -322,9 +322,9 @@ describe('Noteful API - Notes', function () {
         });
     });
 
-    it.skip('should return an error when missing "title" field', function () {
+    it('should return an error when missing "title" field', function () {
       const updateItem = {
-        'content': 'woof woof'
+        'title': ''
       };
       let data;
       return Note.findOne({ userId: user.id })
